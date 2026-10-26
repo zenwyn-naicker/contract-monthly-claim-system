@@ -1,0 +1,204 @@
+﻿@* /*Author: Zenwyn Naicker*/
+/*Code Attribution: */
+/**************************************************************************************************************
+* Author: Microsoft
+* Date: 2025
+* Title: Get started with Razor Pages in ASP.NET Core
+* Type: [Source Code]
+* Available at: <https: //learn.microsoft.com/en-us/aspnet/core/tutorials/razor-pages/razor-pages-start?view =aspnetcore-9.0&tabs =visual-studio> [Accessed 2 November 2025]
+**************************************************************************************************************/
+/**************************************************************************************************************
+* Author: Dentistkiller Yusuf
+* Date: 2025
+* Title: HTML, CSS, and C# in Web Development
+* Type: [Source Code]
+* Available at: <https: //github.com/Dentistkiller/CSS> [Accessed 2 November 2025]
+**************************************************************************************************************/ *@
+
+<!-- Lecturer claim form + document upload -->
+@{
+    ViewData["Title"] = "Submit Claim";
+    var hourlyRate = ViewBag.HourlyRate ?? 0;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Submit Monthly Claim</h4>
+                    <p class="mb-0">Lecturer: @ViewBag.LecturerName</p>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Success"]
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    <form method="post" action="@Url.Action("Submit", "Claims")" enctype="multipart/form-data" id="claimForm">
+                        <div class="form-group mb-3">
+                            <label for="claimMonth">Claim Month</label>
+                            <input type="month" class="form-control" id="claimMonth" name="claimMonth" required>
+                            <small class="form-text text-muted">Select the month you are claiming for</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="hoursWorked">Hours Worked</label>
+                                    <input type="number" step="0.5" min="0.5" max="744" class="form-control" id="hoursWorked" name="hoursWorked" placeholder="0.0" required>
+                                    <small class="form-text text-muted">Between 0.5 and 744 hours</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <!-- Hourly Rate - Read-only display with hidden field -->
+                                <div class="form-group mb-3">
+                                    <label for="hourlyRateDisplay">Hourly Rate (R)</label>
+                                    <input type="text" class="form-control" id="hourlyRateDisplay" value="R @hourlyRate.ToString("F2")" readonly disabled>
+                                    <input type="hidden" id="hourlyRate" name="hourlyRate" value="@hourlyRate">
+                                    <small class="form-text text-muted">Set by HR - cannot be changed</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="totalAmount">Total Amount</label>
+                            <input type="text" class="form-control" id="totalAmount" readonly placeholder="R 0.00">
+                            <small class="form-text text-muted">This will be calculated automatically: Hours × Rate</small>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="notes">Additional Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Any additional information about this claim..."></textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="documents">Supporting Documents (Securely Encrypted)</label>
+                            <input type="file" class="form-control" id="documents" name="documents" multiple accept=".pdf,.docx,.xlsx,.doc,.xls,.jpg,.png">
+                            <small class="form-text text-muted">
+                                Upload supporting documents (PDF, DOCX, XLSX, DOC, XLS, JPG, PNG - max 5MB each, 20MB total). All files are encrypted using AES-256
+                                encryption.
+                            </small>
+                            <div id="fileValidationError" class="text-danger mt-2" style="display: none;"></div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">Submit Claim</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6>Submission Guidelines</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><strong>Monthly Claims:</strong> Submit by the 5th of each month</li>
+                        <li><strong>Required Documents:</strong> Timesheet, contract copy</li>
+                        <li><strong>Processing Time:</strong> 5-7 business days</li>
+                        <li><strong>Status Updates:</strong> Check your dashboard regularly</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6>Security Information</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small mb-0">All uploaded documents are secured with:</p>
+                    <ul class="small">
+                        <li>AES-256 bit encryption</li>
+                        <li>Secure storage outside web directory</li>
+                        <li>File type and size validation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-calculate total amount using hidden hourly rate field 
+    document.getElementById('hoursWorked').addEventListener('input', calculateTotal);
+
+    function calculateTotal() {
+        var hours = parseFloat(document.getElementById('hoursWorked').value) || 0;
+        var rate = parseFloat(document.getElementById('hourlyRate').value) || 0;  // Use hidden field
+        var total = hours * rate;
+        document.getElementById('totalAmount').value = 'R ' + total.toFixed(2);
+    }
+
+    window.addEventListener('load', calculateTotal);
+
+    // File validation
+    const allowedExtensions = ['.pdf', '.docx', '.xlsx', '.doc', '.xls', '.jpg', '.png'];
+    const maxFileSize = 5 * 1024 * 1024; // 5MB
+    const maxTotalSize = 20 * 1024 * 1024; // 20MB
+
+    document.getElementById('documents').addEventListener('change', function(e) {
+        const errorDiv = document.getElementById('fileValidationError');
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        let totalSize = 0;
+        let hasError = false;
+        let errorMessage = '';
+
+        for (let file of files) {
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+            // Check file extension
+            if (!allowedExtensions.includes(fileExtension)) {
+                hasError = true;
+                errorMessage = `Invalid file type: ${file.name}. Allowed types: ${allowedExtensions.join(', ')}`;
+                break;
+            }
+
+            // Check individual file size
+            if (file.size > maxFileSize) {
+                hasError = true;
+                errorMessage = `File too large: ${file.name}. Maximum size is 5MB per file.`;
+                break;
+            }
+
+            totalSize += file.size;
+        }
+
+        // Check total size
+        if (!hasError && totalSize > maxTotalSize) {
+            hasError = true;
+            errorMessage = `Total file size (${(totalSize / 1024 / 1024).toFixed(2)}MB) exceeds maximum of 20MB.`;
+        }
+
+        if (hasError) {
+            errorDiv.textContent = errorMessage;
+            errorDiv.style.display = 'block';
+            e.target.value = ''; // Clear file input
+        }
+    });
+
+    // Form submission
+    document.getElementById('claimForm').addEventListener('submit', function(e) {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+    });
+</script>

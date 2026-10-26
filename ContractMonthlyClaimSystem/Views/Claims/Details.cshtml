@@ -1,0 +1,312 @@
+﻿@* /*Author: Zenwyn Naicker*/
+/*Code Attribution: */
+/**************************************************************************************************************
+* Author: Microsoft
+* Date: 2025
+* Title: Get started with Razor Pages in ASP.NET Core
+* Type: [Source Code]
+* Available at: <https: //learn.microsoft.com/en-us/aspnet/core/tutorials/razor-pages/razor-pages-start?view =aspnetcore-9.0&tabs =visual-studio> [Accessed 10 September 2025]
+**************************************************************************************************************/
+/**************************************************************************************************************
+* Author: Dentistkiller Yusuf
+* Date: 2025
+* Title: HTML, CSS, and C# in Web Development
+* Type: [Source Code]
+* Available at: <https: //github.com/Dentistkiller/CSS> [Accessed 10 September 2025]
+**************************************************************************************************************/ *@
+
+<!-- Claim review with documents -->
+@model ContractMonthlyClaimSystem.Models.Claim
+@{
+    ViewData["Title"] = "Claim Details";
+    var documents = ViewBag.Documents as List<ContractMonthlyClaimSystem.Models.Document>;
+    var userRole = ViewBag.UserRole as string;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Claim Details #@Model.ClaimId</h4>
+                        <span class="badge bg-@(Model.Status == "Pending" ? "warning" : Model.Status == "Verified" ? "info" : Model.Status == "Approved" ? "success" : "danger")">
+                            @Model.Status
+                        </span>
+                    </div>
+                    <small class="text-muted">Submitted: @Model.SubmittedDate?.ToString("dd MMMM yyyy")</small>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Success"]
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Claim Information</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Lecturer:</strong></td>
+                                    <td>@Model.Lecturer?.FirstName @Model.Lecturer?.LastName</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Claim Month:</strong></td>
+                                    <td>@Model.ClaimMonth</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Hours Worked:</strong></td>
+                                    <td>@Model.HoursWorked hours</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Hourly Rate:</strong></td>
+                                    <td>R @Model.HourlyRate</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total Amount:</strong></td>
+                                    <td><strong>R @((Model.HoursWorked * Model.HourlyRate).ToString("F2"))</strong></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Status Information</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Current Status:</strong></td>
+                                    <td>@Model.Status</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Submitted Date:</strong></td>
+                                    <td>@Model.SubmittedDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                                @if (Model.ReviewedBy.HasValue)
+                                {
+                                    <tr>
+                                        <td><strong>Reviewed By:</strong></td>
+                                        <td>@Model.ReviewedByNavigation?.FirstName @Model.ReviewedByNavigation?.LastName</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Reviewed Date:</strong></td>
+                                        <td>@Model.ReviewedDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td><strong>Review Status:</strong></td>
+                                        <td><em>Awaiting review</em></td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <h6>Additional Notes</h6>
+                                <div class="alert alert-light">
+                                    @Model.Notes
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Action Panel -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6>Actions</h6>
+                </div>
+                <div class="card-body">
+                    @if (userRole == "Coordinator" && Model.Status == "Pending")
+                    {
+                        <form method="post" action="@Url.Action("Approve", "Claims")" class="d-inline">
+                            <input type="hidden" name="id" value="@Model.ClaimId" />
+                            <button type="submit" class="btn btn-success btn-sm mb-2 w-100" onclick="return confirm('Are you sure you want to verify this claim?');">
+                                Verify Claim
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-danger btn-sm mb-2 w-100" onclick="rejectClaim(@Model.ClaimId)">
+                            Reject Claim
+                        </button>
+                    }
+                    else if (userRole == "Manager" && Model.Status == "Verified")
+                    {
+                        <form method="post" action="@Url.Action("Approve", "Claims")" class="d-inline">
+                            <input type="hidden" name="id" value="@Model.ClaimId" />
+                            <button type="submit" class="btn btn-success btn-sm mb-2 w-100" onclick="return confirm('Give final approval to this claim?');">
+                                Final Approval
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-warning btn-sm mb-2 w-100" onclick="rejectClaim(@Model.ClaimId)">
+                            Return for Revision
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Status Progress -->
+            <div class="card">
+                <div class="card-header">
+                    <h6>Process Status</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center @(Model.SubmittedDate.HasValue ? "list-group-item-success" : "")">
+                            <span>1. Submitted</span>
+                            @if (Model.SubmittedDate.HasValue)
+                            {
+                                <span class="badge bg-success rounded-pill">✓</span>
+                            }
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center @(Model.Status == "Verified" || Model.Status == "Approved" ? "list-group-item-success" : Model.Status == "Pending" ? "list-group-item-warning" : "")">
+                            <span>2. Verification</span>
+                            @if (Model.Status == "Verified" || Model.Status == "Approved")
+                            {
+                                <span class="badge bg-success rounded-pill">✓</span>
+                            }
+                            else if (Model.Status == "Pending")
+                            {
+                                <span class="badge bg-warning rounded-pill">⋯</span>
+                            }
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center @(Model.Status == "Approved" ? "list-group-item-success" : Model.Status == "Verified" ? "list-group-item-warning" : "")">
+                            <span>3. Final Approval</span>
+                            @if (Model.Status == "Approved")
+                            {
+                                <span class="badge bg-success rounded-pill">✓</span>
+                            }
+                            else if (Model.Status == "Verified")
+                            {
+                                <span class="badge bg-warning rounded-pill">⋯</span>
+                            }
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center @(Model.Status == "Approved" ? "list-group-item-success" : "")">
+                            <span>4. Payment</span>
+                            @if (Model.Status == "Approved")
+                            {
+                                <span class="badge bg-success rounded-pill">✓</span>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supporting Documents -->
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Supporting Documents (Encrypted)</h5>
+                </div>
+                <div class="card-body">
+                    @if (documents != null && documents.Any())
+                    {
+                        <div class="alert alert-info">
+                            <small><strong>Security:</strong> All documents are encrypted with AES-256 encryption and stored securely. Downloads are decrypted on-the-fly.</small>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>File Name</th>
+                                        <th>Upload Date</th>
+                                        <th>File Type</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var doc in documents)
+                                    {
+                                        <tr>
+                                            <td>@doc.FileName</td>
+                                            <td>@doc.UploadedDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                @{
+                                                    var ext = System.IO.Path.GetExtension(doc.FileName).ToLower();
+                                                }
+                                                @if (ext == ".pdf")
+                                                {
+                                                    <span class="badge bg-danger">PDF</span>
+                                                }
+                                                else if (ext == ".docx" || ext == ".doc")
+                                                {
+                                                    <span class="badge bg-primary">Word</span>
+                                                }
+                                                else if (ext == ".xlsx" || ext == ".xls")
+                                                {
+                                                    <span class="badge bg-success">Excel</span>
+                                                }
+                                                else if (ext == ".jpg" || ext == ".png")
+                                                {
+                                                    <span class="badge bg-warning">Image</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Other</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("DownloadDocument", "Claims", new { id = doc.DocumentId })" class="btn btn-sm btn-outline-primary">
+                                                    Download
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <p class="text-muted">No supporting documents uploaded for this claim.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function rejectClaim(claimId) {
+        var reason = prompt('Please enter rejection reason:');
+        if (reason && reason.trim() !== '') {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("Reject", "Claims")';
+
+            var inputId = document.createElement('input');
+            inputId.type = 'hidden';
+            inputId.name = 'id';
+            inputId.value = claimId;
+            form.appendChild(inputId);
+
+            var inputReason = document.createElement('input');
+            inputReason.type = 'hidden';
+            inputReason.name = 'rejectionReason';
+            inputReason.value = reason;
+            form.appendChild(inputReason);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>

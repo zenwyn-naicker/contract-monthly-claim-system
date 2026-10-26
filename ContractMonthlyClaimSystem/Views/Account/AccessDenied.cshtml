@@ -1,0 +1,43 @@
+﻿@* /*Author: Zenwyn Naicker*/
+/*Code Attribution: */
+/**************************************************************************************************************
+* Author: Microsoft
+* Date: 2025
+* Title: Get started with Razor Pages in ASP.NET Core
+* Type: [Source Code]
+* Available at: <https: //learn.microsoft.com/en-us/aspnet/core/tutorials/razor-pages/razor-pages-start?view =aspnetcore-9.0&tabs =visual-studio> [Accessed 16 November 2025]
+**************************************************************************************************************/
+/**************************************************************************************************************
+* Author: Dentistkiller Yusuf
+* Date: 2025
+* Title: HTML, CSS, and C# in Web Development
+* Type: [Source Code]
+* Available at: <https: //github.com/Dentistkiller/CSS> [Accessed 16 November 2025]
+**************************************************************************************************************/ *@
+
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Access Denied</h4>
+                <p>@ViewBag.Message</p>
+                <hr>
+                <p class="mb-0">
+                    You do not have permission to access this page. Please contact your administrator if you believe this is an error.
+                </p>
+                <div class="mt-3">
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                        <i class="bi bi-house-door-fill"></i> Return to Dashboard
+                    </a>
+                    <a href="@Url.Action("Logout", "Account")" class="btn btn-secondary">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

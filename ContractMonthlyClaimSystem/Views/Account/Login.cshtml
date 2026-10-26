@@ -1,0 +1,91 @@
+﻿@* /*Author: Zenwyn Naicker*/
+/*Code Attribution: */
+/**************************************************************************************************************
+* Author: Microsoft
+* Date: 2025
+* Title: Get started with Razor Pages in ASP.NET Core
+* Type: [Source Code]
+* Available at: <https: //learn.microsoft.com/en-us/aspnet/core/tutorials/razor-pages/razor-pages-start?view =aspnetcore-9.0&tabs =visual-studio> [Accessed 10 September 2025]
+**************************************************************************************************************/
+/**************************************************************************************************************
+* Author: Dentistkiller Yusuf
+* Date: 2025
+* Title: HTML, CSS, and C# in Web Development
+* Type: [Source Code]
+* Available at: <https: //github.com/Dentistkiller/CSS> [Accessed 10 September 2025]
+**************************************************************************************************************/ *@
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="text-center">Login to CMCS</h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-info">
+                            @TempData["Message"]
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Success"]
+                        </div>
+                    }
+
+                    <form method="post" action="@Url.Action("Login", "Account")">
+                        <div class="form-group mb-3">
+                            <label for="email">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="userRole">Login As</label>
+                            <select class="form-control" id="userRole" name="userRole">
+                                <option value="Lecturer">Lecturer</option>
+                                <option value="Coordinator">Programme Coordinator</option>
+                                <option value="Manager">Academic Manager</option>
+                                <option value="HR">HR</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                    </form>
+
+                    <!-- Test credentials for easy access -->
+                    <div class="alert alert-light mt-3">
+                        <strong>Test Credentials:</strong><br>
+                        <small>
+                            <strong>Lecturer:</strong> thabo.mthembu@university.ac.za / password123<br>
+                            <strong>Coordinator:</strong> lerato.dlamini@university.ac.za / password456<br>
+                            <strong>Manager:</strong> sipho.nkosi@university.ac.za / password789<br>
+                            <strong>HR:</strong> naledi.mokoena@university.ac.za / password000<br>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

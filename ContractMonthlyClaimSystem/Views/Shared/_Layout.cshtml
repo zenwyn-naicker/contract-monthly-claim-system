@@ -1,0 +1,185 @@
+﻿@* /*Author: Zenwyn Naicker*/
+/*Code Attribution: */
+/**************************************************************************************************************
+* Author: Microsoft
+* Date: 2025
+* Title: Get started with Razor Pages in ASP.NET Core
+* Type: [Source Code]
+* Available at: <https: //learn.microsoft.com/en-us/aspnet/core/tutorials/razor-pages/razor-pages-start?view =aspnetcore-9.0&tabs =visual-studio> [Accessed 2 November 2025]
+**************************************************************************************************************/
+/**************************************************************************************************************
+* Author: Hefaz, H
+* Date: 2025
+* Title: Customizing Navbar In MVC 5 With Bootstrap
+* Type: [Source Code]
+* Available at: <https: //www.csharp.com/article/customizing-navbar-in-mvc-5-with-bootstrap /> [Accessed 2 November 2025]
+**************************************************************************************************************/
+/**************************************************************************************************************
+* Author: Dentistkiller Yusuf
+* Date: 2025
+* Title: HTML, CSS, and C# in Web Development
+* Type: [Source Code]
+* Available at: <https: //github.com/Dentistkiller/CSS> [Accessed 2 November 2025]
+**************************************************************************************************************/ 
+/**************************************************************************************************************
+ * Author: The IIE
+ * Date: 2025
+ * Title: Session Management – Roles [PROG6212]
+ * Type: [Source Code]
+ **************************************************************************************************************/ *@
+
+@{
+      var userName = Context.Session.GetString("UserName");
+      var userRole = Context.Session.GetString("UserRole");
+      var isLoggedIn = Context.Session.GetInt32("UserId") != null;
+  }
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CMCS</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ContractMonthlyClaimSystem.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <strong>CMCS</strong> <small class="text-muted">Contract Monthly Claim System</small>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        @if (isLoggedIn)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Dashboard</a>
+                            </li>
+
+                            @if (userRole == "Lecturer")
+                            {
+                                <!-- Lecturer Menu -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        My Claims
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Claims" asp-action="Submit">Submit New Claim</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Claims" asp-action="Track">Track My Claims</a></li>
+                                    </ul>
+                                </li>
+                            }
+                            else if (userRole == "Coordinator")
+                            {
+                                <!-- Coordinator Menu -->
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Claims" asp-action="PendingVerification">Pending Verification</a>
+                                </li>
+                            }
+                            else if (userRole == "Manager")
+                            {
+                                <!-- Manager Menu -->
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Claims" asp-action="PendingApproval">Pending Approval</a>
+                                </li>
+                            }
+                            else if (userRole == "HR")
+                            {
+                                <!-- HR Menu -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        HR Management
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="HR" asp-action="ManageLecturers">Manage Lecturers</a></li>
+                                        <li><a class="dropdown-item" asp-controller="HR" asp-action="ApprovedClaims">Approved Claims</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="HR" asp-action="GenerateReport">Generate Report</a></li>
+                                    </ul>
+                                </li>
+                            }
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @if (isLoggedIn)
+                        {
+                            <!-- Logged In User Menu -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    @userName
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><h6 class="dropdown-header">@userRole</h6></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Logout">Logout</a></li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <!-- Not Logged In -->
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            <!-- Display any temporary messages -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    @TempData["Message"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    &copy; 2025 - Contract Monthly Claim System (CMCS)
+                </div>
+                <div class="col-md-6 text-end">
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

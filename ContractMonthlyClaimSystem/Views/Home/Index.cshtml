@@ -1,0 +1,136 @@
+﻿@* /*Author: Zenwyn Naicker*/
+/*Code Attribution: */
+/**************************************************************************************************************
+* Author: Microsoft
+* Date: 2025
+* Title: Get started with Razor Pages in ASP.NET Core
+* Type: [Source Code]
+* Available at: <https: //learn.microsoft.com/en-us/aspnet/core/tutorials/razor-pages/razor-pages-start?view =aspnetcore-9.0&tabs =visual-studio> [Accessed 10 September 2025]
+**************************************************************************************************************/
+/**************************************************************************************************************
+* Author: Dentistkiller Yusuf
+* Date: 2025
+* Title: HTML, CSS, and C# in Web Development
+* Type: [Source Code]
+* Available at: <https: //github.com/Dentistkiller/CSS> [Accessed 10 September 2025]
+**************************************************************************************************************/ *@
+
+<!-- Role-based dashboard -->
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Contract Monthly Claim System</h2>
+            <p>Welcome, @ViewBag.UserName (@ViewBag.UserRole)</p>
+        </div>
+    </div>
+
+    @if (ViewBag.UserRole == "Lecturer")
+    {
+        <!-- Lecturer Dashboard -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Pending Claims</h5>
+                        <h3>@ViewBag.PendingClaims</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Approved Claims</h5>
+                        <h3>@ViewBag.ApprovedClaims</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Rejected Claims</h5>
+                        <h3>@ViewBag.RejectedClaims</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Total Earnings</h5>
+                        <h3>R @ViewBag.TotalEarnings</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <a href="@Url.Action("Submit", "Claims")" class="btn btn-primary mb-2">Submit New Claim</a><br>
+                        <a href="@Url.Action("Track", "Claims")" class="btn btn-secondary">Track My Claims</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Recent Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (ViewBag.PendingClaims > 0)
+                        {
+                            <p>You have @ViewBag.PendingClaims pending claim(s)</p>
+                            <a href="@Url.Action("Track", "Claims")" class="btn btn-sm btn-primary">View Claims</a>
+                        }
+                        else
+                        {
+                            <p>No pending claims</p>
+                            <a href="@Url.Action("Submit", "Claims")" class="btn btn-sm btn-primary">Submit New Claim</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (ViewBag.UserRole == "Coordinator")
+    {
+        <!-- Programme Coordinator Dashboard -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Programme Coordinator Dashboard</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Claims awaiting verification: @ViewBag.PendingClaims</p>
+                        <a href="@Url.Action("PendingVerification", "Claims")" class="btn btn-warning">Review Pending Claims</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (ViewBag.UserRole == "Manager")
+    {
+        <!-- Academic Manager Dashboard -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Academic Manager Dashboard</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Claims awaiting final approval: @ViewBag.PendingClaims</p>
+                        <a href="@Url.Action("PendingApproval", "Claims")" class="btn btn-success">Review for Approval</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

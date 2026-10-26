@@ -1,0 +1,156 @@
+@* /*Author: Zenwyn Naicker*/
+/*Code Attribution: */
+/**************************************************************************************************************
+* Author: Microsoft
+* Date: 2025
+* Title: Get started with Razor Pages in ASP.NET Core
+* Type: [Source Code]
+* Available at: <https: //learn.microsoft.com/en-us/aspnet/core/tutorials/razor-pages/razor-pages-start?view =aspnetcore-9.0&tabs =visual-studio> [Accessed 2 November 2025]
+**************************************************************************************************************/
+/**************************************************************************************************************
+* Author: Dentistkiller Yusuf
+* Date: 2025
+* Title: HTML, CSS, and C# in Web Development
+* Type: [Source Code]
+* Available at: <https: //github.com/Dentistkiller/CSS> [Accessed 2 November 2025]
+**************************************************************************************************************/ 
+/**************************************************************************************************************
+ * Author: OpenAI
+ * Date: 2025
+ * Title: Example of how to generate a report
+ * Type: [Source Code]
+ * Link to chat: <https://chatgpt.com/share/6909ff85-f7d4-8009-9d12-a0cc7d2b6598> [Accessed 2 November 2025]
+ **************************************************************************************************************/ *@
+
+@model IEnumerable<ContractMonthlyClaimSystem.Models.Claim>
+@{
+    ViewData["Title"] = "Payment Report";
+    var reportDate = ViewBag.ReportDate ?? DateTime.Now;
+    var grandTotal = ViewBag.GrandTotal ?? 0m;
+    var claimMonth = ViewBag.ClaimMonthFilter;
+}
+
+<div class="container" id="reportContent">
+    <div class="row mb-4">
+        <div class="col-md-12 text-end no-print">
+            <button onclick="window.print()" class="btn btn-primary">Print Report</button>
+            <a href="@Url.Action("ApprovedClaims", "HR")" class="btn btn-secondary">Back to Claims</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <!-- Report Header -->
+            <div class="text-center mb-4">
+                <h2>Contract Monthly Claim System (CMCS)</h2>
+                <h4>Payment Report</h4>
+                <p class="text-muted">
+                    @if (!string.IsNullOrEmpty(claimMonth))
+                    {
+                        <span>Period: @claimMonth</span>
+                    }
+                    else
+                    {
+                        <span>All Approved Claims</span>
+                    }
+                    <br />
+                    Generated: @reportDate.ToString("dd MMMM yyyy HH:mm")
+                </p>
+            </div>
+
+            <hr />
+
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Claim ID</th>
+                                <th>Lecturer Name</th>
+                                <th>Email</th>
+                                <th>Claim Month</th>
+                                <th>Hours Worked</th>
+                                <th>Hourly Rate</th>
+                                <th>Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var claim in Model)
+                            {
+                                <tr>
+                                    <td>#@claim.ClaimId</td>
+                                    <td>@claim.Lecturer.FirstName @claim.Lecturer.LastName</td>
+                                    <td>@claim.Lecturer.Email</td>
+                                    <td>@claim.ClaimMonth</td>
+                                    <td>@claim.HoursWorked.ToString("F2")</td>
+                                    <td>R @claim.HourlyRate.ToString("F2")</td>
+                                    <td>R @claim.TotalAmount?.ToString("F2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-dark">
+                                <td colspan="6" class="text-end"><strong>GRAND TOTAL:</strong></td>
+                                <td><strong>R @grandTotal.ToString("F2")</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="mt-4">
+                    <p><strong>Summary:</strong></p>
+                    <ul>
+                        <li>Total Claims: @Model.Count()</li>
+                        <li>Total Lecturers: @Model.Select(c => c.LecturerId).Distinct().Count()</li>
+                        <li>Total Amount Payable: R @grandTotal.ToString("F2")</li>
+                    </ul>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <p class="text-muted">No approved claims to report.</p>
+                </div>
+            }
+
+            <hr class="mt-5" />
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <p>
+                        <strong>Prepared By:</strong><br />
+                        HR Department<br />
+                        Contract Monthly Claim System
+                    </p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>
+                        <strong>Signature:</strong><br />
+                        <br />
+                        _______________________<br />
+                        HR Manager
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+        }
+
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+</style>

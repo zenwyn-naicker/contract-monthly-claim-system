@@ -1,0 +1,220 @@
+﻿@* /*Author: Zenwyn Naicker*/
+/*Code Attribution: */
+/**************************************************************************************************************
+* Author: Microsoft
+* Date: 2025
+* Title: Get started with Razor Pages in ASP.NET Core
+* Type: [Source Code]
+* Available at: <https: //learn.microsoft.com/en-us/aspnet/core/tutorials/razor-pages/razor-pages-start?view =aspnetcore-9.0&tabs =visual-studio> [Accessed 2 November 2025]
+**************************************************************************************************************/
+/**************************************************************************************************************
+* Author: Dentistkiller Yusuf
+* Date: 2025
+* Title: HTML, CSS, and C# in Web Development
+* Type: [Source Code]
+* Available at: <https: //github.com/Dentistkiller/CSS> [Accessed 2 November 2025]
+**************************************************************************************************************/ 
+/**************************************************************************************************************
+ * Author: OpenAI
+ * Date: 2025
+ * Title: Example of automatic checks on high values
+ * Type: [Source Code]
+ * Link to chat: <https://chatgpt.com/share/690a05f2-e544-8009-a6b8-46fa612b78d6> [Accessed 2 November 2025]
+ **************************************************************************************************************/ *@
+
+<!-- Programme Coordinator view -->
+@model IEnumerable<ContractMonthlyClaimSystem.Models.Claim>
+@{
+    ViewData["Title"] = "Pending Verification";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Claims Pending Verification</h4>
+                    <p class="mb-0">Programme Coordinator Dashboard</p>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Success"]
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Claim ID</th>
+                                        <th>Lecturer</th>
+                                        <th>Month</th>
+                                        <th>Hours</th>
+                                        <th>Rate</th>
+                                        <th>Total Amount</th>
+                                        <th>Submitted</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var claim in Model)
+                                    {
+                                        // AUTOMATED CHECKS
+                                        var isHighHours = claim.HoursWorked > 160;
+                                        var isHighAmount = (claim.HoursWorked * claim.HourlyRate) > 50000;
+                                        var hasWarning = isHighHours || isHighAmount;
+
+                                        <tr class="@(hasWarning ? "table-warning" : "")">
+                                            <td>#@claim.ClaimId</td>
+                                            <td>
+                                                @claim.Lecturer?.FirstName @claim.Lecturer?.LastName
+                                                @if (hasWarning)
+                                                {
+                                                    <br />
+                                        
+                                                    <small class="badge bg-warning text-dark">⚠️ Review Required</small>
+                                                }
+                                            </td>
+                                            <td>@claim.ClaimMonth</td>
+                                            <td>
+                                                @claim.HoursWorked
+                                                @if (isHighHours)
+                                                {
+                                                    <br />
+                                        
+                                                    <small class="text-danger">⚠️ Exceeds 160h/month</small>
+                                                }
+                                            </td>
+                                            <td>R @claim.HourlyRate</td>
+                                            <td>
+                                                <strong>R @((claim.HoursWorked * claim.HourlyRate).ToString("F2"))</strong>
+                                                @if (isHighAmount)
+                                                {
+                                                    <br />
+                                        
+                                                    <small class="text-danger">⚠️ High value claim</small>
+                                                }
+                                            </td>
+                                            <td>@claim.SubmittedDate?.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <span class="badge bg-warning">@claim.Status</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", "Claims", new { id = claim.ClaimId })" class="btn btn-sm btn-outline-primary">Review</a>
+                                                    <button type="button" class="btn btn-sm btn-success" onclick="approveClaim(@claim.ClaimId)">Approve</button>
+                                                    <button type="button" class="btn btn-sm btn-danger" onclick="rejectClaim(@claim.ClaimId)">Reject</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- AUTOMATED SUMMARY SECTION -->
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div class="alert alert-info">
+                                    <h6>Automated Review Summary:</h6>
+                                    <ul class="mb-0">
+                                        <li><strong>Total Claims:</strong> @Model.Count()</li>
+                                        <li><strong>High Hours Claims (>160h):</strong> @Model.Count(c => c.HoursWorked > 160)</li>
+                                        <li><strong>High Value Claims (>R50k):</strong> @Model.Count(c => (c.HoursWorked * c.HourlyRate) > 50000)</li>
+                                        <li><strong>Total Amount:</strong> R @Model.Sum(c => c.HoursWorked * c.HourlyRate).ToString("F2")</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">No claims pending verification at this time.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Guidelines -->
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6>Verification Guidelines</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Check Requirements:</h6>
+                            <ul>
+                                <li>Hours worked are reasonable</li>
+                                <li>Hourly rate matches contract</li>
+                                <li>Supporting documents attached</li>
+                                <li>Claim period is correct</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Next Steps:</h6>
+                            <ul>
+                                <li>Approved claims go to Academic Manager</li>
+                                <li>Rejected claims return to lecturer</li>
+                                <li>Lecturer will be notified of status change</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function approveClaim(claimId) {
+        if (confirm('Are you sure you want to approve this claim?')) {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("Approve", "Claims")';
+
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'id';
+            input.value = claimId;
+            form.appendChild(input);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    function rejectClaim(claimId) {
+        if (confirm('Are you sure you want to reject this claim?')) {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("Reject", "Claims")';  
+
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'id';
+            input.value = claimId;
+            form.appendChild(input);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>

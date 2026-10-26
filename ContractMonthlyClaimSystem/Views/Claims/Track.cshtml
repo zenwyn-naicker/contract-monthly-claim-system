@@ -1,0 +1,140 @@
+﻿@* /*Author: Zenwyn Naicker*/
+/*Code Attribution: */
+/**************************************************************************************************************
+* Author: Microsoft
+* Date: 2025
+* Title: Get started with Razor Pages in ASP.NET Core
+* Type: [Source Code]
+* Available at: <https: //learn.microsoft.com/en-us/aspnet/core/tutorials/razor-pages/razor-pages-start?view =aspnetcore-9.0&tabs =visual-studio> [Accessed 10 September 2025]
+**************************************************************************************************************/
+/**************************************************************************************************************
+* Author: Dentistkiller Yusuf
+* Date: 2025
+* Title: HTML, CSS, and C# in Web Development
+* Type: [Source Code]
+* Available at: <https: //github.com/Dentistkiller/CSS> [Accessed 10 September 2025]
+**************************************************************************************************************/ *@
+
+<!-- Lecturer's claim status tracking -->
+@model IEnumerable<ContractMonthlyClaimSystem.Models.Claim>
+@{
+    ViewData["Title"] = "Track Claims";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>My Claims Status</h4>
+                    <a href="@Url.Action("Submit", "Claims")" class="btn btn-primary">Submit New Claim</a>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Success"]
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Claim ID</th>
+                                        <th>Month</th>
+                                        <th>Hours</th>
+                                        <th>Rate</th>
+                                        <th>Total Amount</th>
+                                        <th>Status</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var claim in Model)
+                                    {
+                                        <tr>
+                                            <td>#@claim.ClaimId</td>
+                                            <td>@claim.ClaimMonth</td>
+                                            <td>@claim.HoursWorked</td>
+                                            <td>R @claim.HourlyRate</td>
+                                            <td><strong>R @((claim.HoursWorked * claim.HourlyRate).ToString("F2"))</strong></td>
+                                            <td>
+                                                @if (claim.Status == "Pending")
+                                                {
+                                                    <span class="badge bg-warning">Pending</span>
+                                                }
+                                                else if (claim.Status == "Verified")
+                                                {
+                                                    <span class="badge bg-info">Verified</span>
+                                                }
+                                                else if (claim.Status == "Approved")
+                                                {
+                                                    <span class="badge bg-success">Approved</span>
+                                                }
+                                                else if (claim.Status == "Rejected")
+                                                {
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">@claim.Status</span>
+                                                }
+                                            </td>
+                                            <td>@claim.SubmittedDate?.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <a href="@Url.Action("Details", "Claims", new { id = claim.ClaimId })" class="btn btn-sm btn-outline-primary">View</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">No claims submitted yet.</p>
+                            <a href="@Url.Action("Submit", "Claims")" class="btn btn-primary">Submit Your First Claim</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Legend -->
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6>Status Definitions:</h6>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <span class="badge bg-warning">Pending</span> - Awaiting review
+                        </div>
+                        <div class="col-md-3">
+                            <span class="badge bg-info">Verified</span> - Coordinator approved
+                        </div>
+                        <div class="col-md-3">
+                            <span class="badge bg-success">Approved</span> - Ready for payment
+                        </div>
+                        <div class="col-md-3">
+                            <span class="badge bg-danger">Rejected</span> - Requires correction
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
